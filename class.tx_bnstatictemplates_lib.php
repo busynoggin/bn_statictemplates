@@ -31,7 +31,7 @@ class tx_bnstatictemplates_lib {
 
 	public function includeStaticTemplates($params, $parentObject) {
 		$idList = $params['idList'];
-		$templateID = $params['templateId'];
+		$templateId = $params['templateId'];
 		$pid = $params['pid'];
 		$row = $params['row'];
 
@@ -40,6 +40,7 @@ class tx_bnstatictemplates_lib {
 			foreach ($include_static_fileArr as $ISF_filePath) { // traversing list
 				// Specifically process static templates NOT coming from extensions
 				if (substr($ISF_filePath, 0, 4) !== 'EXT:') {
+					$title = $ISF_filePath;
 					$ISF_filePath = PATH_site . $ISF_filePath;
 					if (@is_dir($ISF_filePath)) {
 						$subrow = array(
@@ -47,11 +48,11 @@ class tx_bnstatictemplates_lib {
 							'config' => @is_file($ISF_filePath . 'TypoScript.ts') ? t3lib_div::getUrl($ISF_filePath . 'TypoScript.ts') : '',
 							'include_static' => @is_file($ISF_filePath . 'IncludeStatic.txt') ? implode(',', array_unique(t3lib_div::intExplode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStatic.txt')))) : '',
 							'include_static_file' => @is_file($ISF_filePath . 'IncludeStaticFile.txt') ? implode(',', array_unique(explode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStaticFile.txt')))) : '',
-							'title' => $ISF_file,
+							'title' => $title,
 							'uid' => $mExtKey
 						);
 						$subrow = $parentObject->prependStaticExtra($subrow);
-						$parentObject->processTemplate($subrow, $idList . ',bnstatictemplate_' . $ISF_filePath, $pid, 'bnstatictemplate_' . $ISF_filePath, $templateID);
+						$parentObject->processTemplate($subrow, $idList . ',bnstatictemplate_' . $ISF_filePath, $pid, 'bnstatictemplate_' . $ISF_filePath, $templateId);
 					}
 				}
 			}
