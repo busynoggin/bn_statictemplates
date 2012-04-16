@@ -4,13 +4,13 @@ class tx_bnstatictemplates_lib {
 
 	public function getMainFields_preProcess($table, $row, $parentObject) {
 		if (($table === 'sys_template') && isset($row['tx_bnstatictemplates_path'])) {
-			$siteConfigurationPath = PATH_site . '/' . $row['tx_bnstatictemplates_path'];
-			$configurations = t3lib_div::get_dirs($siteConfigurationPath);
+			$absoluteConfigurationPath = PATH_site . '/' . $row['tx_bnstatictemplates_path'];
+			$relativeConfigurationPath = $row['tx_bnstatictemplates_path'];
+			$configurations = t3lib_div::get_dirs($absoluteConfigurationPath);
 
 			foreach ($configurations as $configurationName) {
-				$configurationPath = $siteConfigurationPath . '/' . $configurationName;
-				if (@is_dir($configurationPath . '/Configuration/TypoScript/')) {
-					self::addStaticTemplateFromPath($configurationPath . '/Configuration/TypoScript/', $configurationName);
+				if (@is_dir($absoluteConfigurationPath . '/' . $configurationName . '/Configuration/TypoScript/')) {
+					self::addStaticTemplateFromPath($relativeConfigurationPath . '/' . $configurationName . '/Configuration/TypoScript/', $configurationName);
 				}
 			}
 		}
@@ -35,6 +35,7 @@ class tx_bnstatictemplates_lib {
 			foreach ($include_static_fileArr as $ISF_filePath) { // traversing list
 				// Specifically process static templates NOT coming from extensions
 				if (substr($ISF_filePath, 0, 4) !== 'EXT:') {
+					$ISF_filePath = PATH_site . $ISF_filePath;
 					if (@is_dir($ISF_filePath)) {
 						$subrow = array(
 							'constants' => @is_file($ISF_filePath . 'Constants.ts') ? t3lib_div::getUrl($ISF_filePath . 'Constants.ts') : '',
