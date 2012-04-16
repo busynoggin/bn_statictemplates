@@ -29,4 +29,8 @@ $tempColumns = array(
 t3lib_div::loadTCA('sys_template');
 t3lib_extMgm::addTCAcolumns('sys_template',$tempColumns,1);
 t3lib_extMgm::addToAllTCAtypes('sys_template','tx_bnstatictemplates_path;;;;1-1-1');
+
+require_once(t3lib_extMgm::extPath('bn_statictemplates') . 'class.tx_bnstatictemplates_lib.php');
+$TCA['sys_template']['columns']['include_static_file']['config']['itemsProcFunc'] = 'tx_bnstatictemplates_lib->addStaticTemplates';
+
 ?>

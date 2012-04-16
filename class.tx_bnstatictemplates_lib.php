@@ -2,25 +2,30 @@
 
 class tx_bnstatictemplates_lib {
 
-	public function getMainFields_preProcess($table, $row, $parentObject) {
-		if (($table === 'sys_template') && isset($row['tx_bnstatictemplates_path'])) {
-			$absoluteConfigurationPath = PATH_site . '/' . $row['tx_bnstatictemplates_path'];
-			$relativeConfigurationPath = $row['tx_bnstatictemplates_path'];
-			$configurations = t3lib_div::get_dirs($absoluteConfigurationPath);
+	public function addStaticTemplates(&$params, &$parentObject) {
+		$row = $params['row'];
+		$absoluteConfigurationPath = PATH_site . '/' . $row['tx_bnstatictemplates_path'];
+		$relativeConfigurationPath = $row['tx_bnstatictemplates_path'];
+		$configurations = t3lib_div::get_dirs($absoluteConfigurationPath);
 
-			foreach ($configurations as $configurationName) {
-				if (@is_dir($absoluteConfigurationPath . '/' . $configurationName . '/Configuration/TypoScript/')) {
-					self::addStaticTemplateFromPath($relativeConfigurationPath . '/' . $configurationName . '/Configuration/TypoScript/', $configurationName);
+		foreach ($configurations as $configurationName) {
+			if (@is_dir($absoluteConfigurationPath . $configurationName . '/Configuration/TypoScript/')) {
+				$itemArray = self::addStaticTemplateFromPath($relativeConfigurationPath . $configurationName . '/Configuration/TypoScript/', $configurationName);
+
+				if ($itemArray) {
+					$params['items'][] = $itemArray;
 				}
 			}
 		}
+
+		return $params['items'];
 	}
 
 	public function addStaticTemplateFromPath($path, $title) {
 		t3lib_div::loadTCA('sys_template');
 		if ($path && is_array($GLOBALS['TCA']['sys_template']['columns'])) {
 			$itemArray = array('Busy Noggin: ' . $title, $path);
-			$GLOBALS['TCA']['sys_template']['columns']['include_static_file']['config']['items'][] = $itemArray;
+			return $itemArray;
 		}
 	}
 
@@ -51,7 +56,6 @@ class tx_bnstatictemplates_lib {
 				}
 			}
 		}
-
 	}
 }
 
