@@ -6,6 +6,7 @@ $tempColumns = array(
 	'tx_bnstatictemplates_path' => array(
 		'exclude' => 0,
 		'label' => 'LLL:EXT:bn_statictemplates/locallang_db.xml:sys_template.tx_bnstatictemplates_path',
+		'displayCond' => 'FIELD:root:REQ:true',
 		'config' => array(
 			'type'     => 'input',
 			'size'     => '15',

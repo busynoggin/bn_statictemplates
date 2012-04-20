@@ -2,10 +2,16 @@
 
 class tx_bnstatictemplates_lib {
 
-	public function addStaticTemplates(&$params, &$parentObject) {
+	/**
+	 * ItemsProcFunc for adding static templates from fileadmin.
+	 *
+	 * @param array $params
+	 * @param object parentObject
+	 */
+	public static function addStaticTemplates(&$params, &$parentObject) {
 		$row = $params['row'];
-		$absoluteConfigurationPath = PATH_site . '/' . $row['tx_bnstatictemplates_path'];
-		$relativeConfigurationPath = $row['tx_bnstatictemplates_path'];
+		$relativeConfigurationPath = self::getStaticTemplatePath($row['pid']);
+		$absoluteConfigurationPath = PATH_site . '/' . $relativeConfigurationPath;
 		$configurations = t3lib_div::get_dirs($absoluteConfigurationPath);
 
 		foreach ($configurations as $configurationName) {
@@ -21,7 +27,26 @@ class tx_bnstatictemplates_lib {
 		return $params['items'];
 	}
 
-	public function addStaticTemplateFromPath($path, $title) {
+	public static function getStaticTemplatePath($pageId) {
+		$tmpl = t3lib_div::makeInstance("t3lib_tsparser_ext");
+		$tmpl->tt_track = 0;
+		$tmpl->init();
+
+		// local template
+		$localTemplateRow = $tmpl->ext_getFirstTemplate($pageId);
+
+		// Gets the rootLine
+		$sys_page = t3lib_div::makeInstance("t3lib_pageSelect");
+		$rootLine = $sys_page->getRootLine($pageId);
+		$tmpl->runThroughTemplates($rootLine, $localTemplateRow['uid']);
+
+		// Use the root page found when walking the rootline
+		$templateRow = $tmpl->ext_getFirstTemplate($tmpl->rootId);
+
+		return $templateRow['tx_bnstatictemplates_path'];
+	}
+
+	public static function addStaticTemplateFromPath($path, $title) {
 		t3lib_div::loadTCA('sys_template');
 		if ($path && is_array($GLOBALS['TCA']['sys_template']['columns'])) {
 			$itemArray = array('Busy Noggin: ' . $title, $path);
@@ -29,7 +54,7 @@ class tx_bnstatictemplates_lib {
 		}
 	}
 
-	public function includeStaticTemplates($params, $parentObject) {
+	public static function includeStaticTemplates($params, $parentObject) {
 		$idList = $params['idList'];
 		$templateId = $params['templateId'];
 		$pid = $params['pid'];
