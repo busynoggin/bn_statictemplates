@@ -9,7 +9,7 @@ $tempColumns = array(
 		'displayCond' => 'FIELD:root:REQ:true',
 		'config' => array(
 			'type'     => 'input',
-			'size'     => '15',
+			'size'     => '30',
 			'max'      => '255',
 			'eval'     => 'trim',
 			'wizards'  => array(
@@ -19,7 +19,10 @@ $tempColumns = array(
 					'title'        => 'Link',
 					'icon'         => 'link_popup.gif',
 					'script'       => 'browse_links.php?mode=wizard',
-					'JSopenParams' => 'height=300,width=500,status=0,menubar=0,scrollbars=1'
+					'JSopenParams' => 'height=300,width=500,status=0,menubar=0,scrollbars=1',
+					'params'       => array(
+						'blindLinkOptions' => 'mail,page,spec,url,file'
+					)
 				)
 			)
 		)
@@ -29,8 +32,7 @@ $tempColumns = array(
 
 t3lib_div::loadTCA('sys_template');
 t3lib_extMgm::addTCAcolumns('sys_template',$tempColumns,1);
-t3lib_extMgm::addToAllTCAtypes('sys_template','tx_bnstatictemplates_path;;;;1-1-1');
-
+t3lib_extMgm::addToAllTCAtypes('sys_template','tx_bnstatictemplates_path;;;;1-1-1', '', 'before:include_static_file');
 require_once(t3lib_extMgm::extPath('bn_statictemplates') . 'class.tx_bnstatictemplates_lib.php');
 $TCA['sys_template']['columns']['include_static_file']['config']['itemsProcFunc'] = 'tx_bnstatictemplates_lib->addStaticTemplates';
 
