@@ -2,6 +2,9 @@
 
 class tx_bnstatictemplates_lib {
 
+	const PATH_TYPE_BASE = 0;
+	const PATH_TYPE_SITE = 1;
+
 	/**
 	 * ItemsProcFunc for adding static templates from fileadmin.
 	 *
@@ -9,25 +12,49 @@ class tx_bnstatictemplates_lib {
 	 * @param object parentObject
 	 */
 	public static function addStaticTemplates(&$params, &$parentObject) {
-		$row = $params['row'];
-		$relativeConfigurationPath = self::getStaticTemplatePath($row['pid']);
-		$absoluteConfigurationPath = PATH_site . '/' . $relativeConfigurationPath;
-		$configurations = t3lib_div::get_dirs($absoluteConfigurationPath);
-
-		foreach ($configurations as $configurationName) {
-			if (@is_dir($absoluteConfigurationPath . $configurationName . '/Configuration/TypoScript/')) {
-				$itemArray = self::addStaticTemplateFromPath($relativeConfigurationPath . $configurationName . '/Configuration/TypoScript/', $configurationName);
-
-				if ($itemArray) {
-					$params['items'][] = $itemArray;
-				}
-			}
+		if (!is_array($params['items'])) {
+			$params['items'] = array();
 		}
 
-		return $params['items'];
+		$baseStaticTemplates = self::getStaticTemplatesInBaseConfigurationPath();
+		$siteStaticTemplates = self::getStaticTemplatesInSiteConfigurationPath($params['row']['pid']);
+
+		$mergedItems = array();
+		$mergedItems['items'] = array_merge($baseStaticTemplates['items'], $siteStaticTemplates['items']);
+		usort($mergedItems['items'], function($a, $b) {
+			return $a[0] > $b[0];
+		});
+
+		$params['items'] = array_merge($params['items'], $mergedItems['items']);
 	}
 
-	public static function getStaticTemplatePath($pageId) {
+	/**
+	 * Gets the base configuration path from EXTCONF
+	 *
+	 * @return string
+	 */
+	protected static function getBaseConfigurationPath() {
+		$extConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['bn_statictemplates']);
+		return $extConf['baseConfigurationPath'];
+	}
+
+	/**
+	 * Gets the items array for static templates in the base configuration path
+	 *
+	 * @return array
+	 */
+	protected static function getStaticTemplatesInBaseConfigurationPath() {
+		$relativeConfigurationPath = self::getBaseConfigurationPath();
+		return self::getStaticTemplatesInPath(self::PATH_TYPE_BASE, $relativeConfigurationPath);
+	}
+
+	/**
+	 * Gets the site configuration path for the given page ID
+	 *
+	 * @param integer $pageId
+	 * @return string
+	 */
+	protected static function getSiteConfigurationPath($pageId) {
 		$tmpl = t3lib_div::makeInstance("t3lib_tsparser_ext");
 		$tmpl->tt_track = 0;
 		$tmpl->init();
@@ -46,14 +73,53 @@ class tx_bnstatictemplates_lib {
 		return $templateRow['tx_bnstatictemplates_path'];
 	}
 
-	public static function addStaticTemplateFromPath($path, $title) {
-		t3lib_div::loadTCA('sys_template');
-		if ($path && is_array($GLOBALS['TCA']['sys_template']['columns'])) {
-			$itemArray = array('Busy Noggin: ' . $title, $path);
-			return $itemArray;
-		}
+	/**
+	 * Gets the items array for the static templates in the site configuration
+	 *
+	 * @return array
+	 */
+	protected static function getStaticTemplatesInSiteConfigurationPath($pid) {
+		$relativeConfigurationPath = self::getSiteConfigurationPath($pid);
+		return self::getStaticTemplatesInPath(self::PATH_TYPE_SITE, $relativeConfigurationPath);
 	}
 
+	/**
+	 * Gets the items array for a given configuration type (base or site) and path.
+	 *
+	 * @param integer $configurationType
+	 * @param string $relativeConfigurationPath
+	 * @return array
+	 */
+	protected static function getStaticTemplatesInPath($configurationType, $relativeConfigurationPath) {
+		$configurations = t3lib_div::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/Extensions/');
+
+		$params = array();
+		$params['items'] = array();
+		foreach ($configurations as $configurationKey) {
+			$pathToTS = trim($relativeConfigurationPath, '/') . '/Extensions/' . $configurationKey . '/Configuration/TypoScript/';
+			if (@is_dir(PATH_site . $pathToTS)) {
+				switch($configurationType) {
+					case self::PATH_TYPE_BASE:
+						$configurationName = $configurationKey . ' (Base)';
+						break;
+					case self::PATH_TYPE_SITE:
+						$configurationName = $configurationKey . ' (Site)';
+				}
+
+				$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
+			}
+		}
+
+		return $params;
+	}
+
+	/**
+	 * Includes static templates as part of the page rendering process.
+	 *
+	 * @param array $params
+	 * @param object $parentObject
+	 * @return void
+	 */
 	public static function includeStaticTemplates($params, $parentObject) {
 		$idList = $params['idList'];
 		$templateId = $params['templateId'];
@@ -62,26 +128,56 @@ class tx_bnstatictemplates_lib {
 
 		if (trim($row['include_static_file'])) {
 			$include_static_fileArr = t3lib_div::trimExplode(',', $row['include_static_file'], TRUE);
-			foreach ($include_static_fileArr as $ISF_filePath) { // traversing list
-				// Specifically process static templates NOT coming from extensions
-				if (substr($ISF_filePath, 0, 4) !== 'EXT:') {
+			foreach ($include_static_fileArr as $ISF_filePath) {
+				// Specifically process static templates NOT coming from extensions and have not already been processed
+				if ((substr($ISF_filePath, 0, 4) !== 'EXT:') && !in_array('bnstatictemplate_' . $ISF_filePath, explode(',', $idList))) {
 					$title = $ISF_filePath;
+					$ISF_relFilePath = $ISF_filePath;
 					$ISF_filePath = PATH_site . $ISF_filePath;
 					if (@is_dir($ISF_filePath)) {
+						// Convert IncludeStaticFile.txt to an array
+						if (@is_file($ISF_filePath . 'IncludeStaticFile.txt')) {
+							$staticFilesIncludedFromTemplate = array_unique(explode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStaticFile.txt')));
+						} else {
+							$staticFilesIncludedFromTemplate = array();
+						}
+
+						$baseConfigurationPath = self::getBaseConfigurationPath();
+						$siteConfigurationPath = $row['tx_bnstatictemplates_path'];
+
+						// If we're including something from site configuraton, look for a corresponding base configuration to include
+						if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
+							$baseConfiguration = str_replace($siteConfigurationPath, $baseConfigurationPath, $ISF_relFilePath);
+							if (@is_dir($baseConfiguration)) {
+								$staticFilesIncludedFromTemplate[] = $baseConfiguration;
+							}
+						}
+
 						$subrow = array(
 							'constants' => @is_file($ISF_filePath . 'Constants.ts') ? t3lib_div::getUrl($ISF_filePath . 'Constants.ts') : '',
 							'config' => @is_file($ISF_filePath . 'TypoScript.ts') ? t3lib_div::getUrl($ISF_filePath . 'TypoScript.ts') : '',
 							'include_static' => @is_file($ISF_filePath . 'IncludeStatic.txt') ? implode(',', array_unique(t3lib_div::intExplode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStatic.txt')))) : '',
-							'include_static_file' => @is_file($ISF_filePath . 'IncludeStaticFile.txt') ? implode(',', array_unique(explode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStaticFile.txt')))) : '',
-							'title' => $title,
-							'uid' => $mExtKey
+							'include_static_file' => implode(',', array_unique($staticFilesIncludedFromTemplate)),
+							'title' => $ISF_relFilePath,
+							'uid' => $ISF_relFilePath
 						);
-						$subrow = $parentObject->prependStaticExtra($subrow);
-						$parentObject->processTemplate($subrow, $idList . ',bnstatictemplate_' . $ISF_filePath, $pid, 'bnstatictemplate_' . $ISF_filePath, $templateId);
+
+						$parentObject->processTemplate($subrow, $idList . ',bnstatictemplate_' . $ISF_relFilePath, $pid, 'bnstatictemplate_' . $ISF_relFilePath, $templateId);
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if the given path is within the site static TSConfig path
+	 *
+	 * @param string $path
+	 * @return boolean
+	 */
+	protected static function isPathWithinSiteStaticTSConfigPath($path) {
+		$siteStaticTSConfigPath = self::getSiteStaticTSConfigPath();
+		return (strstr($path, $siteStaticTSConfigPath) !== FALSE);
 	}
 }
 

@@ -1,0 +1,2 @@
+# cat=basic//1; type=text; label=Configuration Base Path
+baseConfigurationPath = fileadmin/Configuration/Base/
