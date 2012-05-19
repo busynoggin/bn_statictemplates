@@ -95,7 +95,7 @@ class tx_bnstatictemplates_lib {
 
 		$params = array();
 		$params['items'] = array();
-		foreach ($configurations as $configurationKey) {
+		foreach ((array) $configurations as $configurationKey) {
 			$pathToTS = trim($relativeConfigurationPath, '/') . '/Extensions/' . $configurationKey . '/Configuration/TypoScript/';
 			if (@is_dir(PATH_site . $pathToTS)) {
 				switch($configurationType) {
@@ -128,7 +128,7 @@ class tx_bnstatictemplates_lib {
 
 		if (trim($row['include_static_file'])) {
 			$include_static_fileArr = t3lib_div::trimExplode(',', $row['include_static_file'], TRUE);
-			foreach ($include_static_fileArr as $ISF_filePath) {
+			foreach ((array) $include_static_fileArr as $ISF_filePath) {
 				// Specifically process static templates NOT coming from extensions and have not already been processed
 				if ((substr($ISF_filePath, 0, 4) !== 'EXT:') && !in_array('bnstatictemplate_' . $ISF_filePath, explode(',', $idList))) {
 					$title = $ISF_filePath;
