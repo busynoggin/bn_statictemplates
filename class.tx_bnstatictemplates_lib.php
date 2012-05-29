@@ -148,7 +148,7 @@ class tx_bnstatictemplates_lib {
 						// If we're including something from site configuraton, look for a corresponding base configuration to include
 						if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
 							$baseConfiguration = str_replace($siteConfigurationPath, $baseConfigurationPath, $ISF_relFilePath);
-							if (@is_dir($baseConfiguration)) {
+							if (@is_dir(PATH_site . $baseConfiguration)) {
 								$staticFilesIncludedFromTemplate[] = $baseConfiguration;
 							}
 						}
