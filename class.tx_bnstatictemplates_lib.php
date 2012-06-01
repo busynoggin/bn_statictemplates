@@ -143,7 +143,7 @@ class tx_bnstatictemplates_lib {
 						}
 
 						$baseConfigurationPath = self::getBaseConfigurationPath();
-						$siteConfigurationPath = $row['tx_bnstatictemplates_path'];
+						$siteConfigurationPath = self::getSiteConfigurationPath($parentObject->rootId);
 
 						// If we're including something from site configuraton, look for a corresponding base configuration to include
 						if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
