@@ -61,16 +61,19 @@ class tx_bnstatictemplates_lib {
 
 		// local template
 		$localTemplateRow = $tmpl->ext_getFirstTemplate($pageId);
+		if ($localTemplateRow['root']) {
+			return $localTemplateRow['tx_bnstatictemplates_path'];
+		} else {
+			// Gets the rootLine
+			$sys_page = t3lib_div::makeInstance("t3lib_pageSelect");
+			$rootLine = $sys_page->getRootLine($pageId);
+			$tmpl->runThroughTemplates($rootLine, $localTemplateRow['uid']);
 
-		// Gets the rootLine
-		$sys_page = t3lib_div::makeInstance("t3lib_pageSelect");
-		$rootLine = $sys_page->getRootLine($pageId);
-		$tmpl->runThroughTemplates($rootLine, $localTemplateRow['uid']);
+			// Use the root page found when walking the rootline
+			$templateRow = $tmpl->ext_getFirstTemplate($tmpl->rootId);
 
-		// Use the root page found when walking the rootline
-		$templateRow = $tmpl->ext_getFirstTemplate($tmpl->rootId);
-
-		return $templateRow['tx_bnstatictemplates_path'];
+			return $templateRow['tx_bnstatictemplates_path'];
+		}
 	}
 
 	/**
@@ -143,7 +146,13 @@ class tx_bnstatictemplates_lib {
 						}
 
 						$baseConfigurationPath = self::getBaseConfigurationPath();
-						$siteConfigurationPath = self::getSiteConfigurationPath($parentObject->rootId);
+
+						if ($row['root']) {
+							$root = $row['pid'];
+						} else {
+							$root = $parentObject->rootId;
+						}
+						$siteConfigurationPath = self::getSiteConfigurationPath($root);
 
 						// If we're including something from site configuraton, look for a corresponding base configuration to include
 						if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
