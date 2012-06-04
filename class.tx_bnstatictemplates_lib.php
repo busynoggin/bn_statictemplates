@@ -94,10 +94,26 @@ class tx_bnstatictemplates_lib {
 	 * @return array
 	 */
 	protected static function getStaticTemplatesInPath($configurationType, $relativeConfigurationPath) {
-		$configurations = t3lib_div::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/Extensions/');
-
 		$params = array();
 		$params['items'] = array();
+
+		// Default TS
+		$pathToTS = trim($relativeConfigurationPath, '/') . '/Default/Configuration/TypoScript/';
+		if (@is_dir(PATH_site . $pathToTS)) {
+			switch($configurationType) {
+				case self::PATH_TYPE_BASE:
+					$configurationName = $configurationKey . ' (Base)';
+					break;
+				case self::PATH_TYPE_SITE:
+					$configurationName = $configurationKey . ' (Site)';
+			}
+
+			$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
+		}
+
+		// Extension TS
+		$configurations = t3lib_div::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/Extensions/');
+
 		foreach ((array) $configurations as $configurationKey) {
 			$pathToTS = trim($relativeConfigurationPath, '/') . '/Extensions/' . $configurationKey . '/Configuration/TypoScript/';
 			if (@is_dir(PATH_site . $pathToTS)) {
