@@ -125,6 +125,24 @@ class tx_bnstatictemplates_lib {
 						$configurationName = $configurationKey . ' (Site)';
 				}
 
+				$params['items'][] = array('BN: EXT:' . $configurationName, $pathToTS);
+			}
+		}
+
+		// addStaticTemplates TS
+		$configurations = t3lib_div::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/StaticTemplates/');
+
+		foreach ((array) $configurations as $configurationKey) {
+			$pathToTS = trim($relativeConfigurationPath, '/') . '/StaticTemplates/' . $configurationKey . '/Configuration/TypoScript/';
+			if (@is_dir(PATH_site . $pathToTS)) {
+				switch($configurationType) {
+					case self::PATH_TYPE_BASE:
+						$configurationName = $configurationKey . ' (Base)';
+						break;
+					case self::PATH_TYPE_SITE:
+						$configurationName = $configurationKey . ' (Site)';
+				}
+
 				$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
 			}
 		}
