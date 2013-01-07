@@ -183,16 +183,19 @@ class tx_bnstatictemplates_lib {
 
 						if ($row['root']) {
 							$root = $row['pid'];
-						} else {
+						} elseif ($parentObject->rootId) {
 							$root = $parentObject->rootId;
 						}
-						$siteConfigurationPath = self::getSiteConfigurationPath($root);
 
-						// If we're including something from site configuraton, look for a corresponding base configuration to include
-						if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
-							$baseConfiguration = str_replace($siteConfigurationPath, $baseConfigurationPath, $ISF_relFilePath);
-							if (@is_dir(PATH_site . $baseConfiguration)) {
-								$staticFilesIncludedFromTemplate[] = $baseConfiguration;
+						if ($root) {
+							$siteConfigurationPath = self::getSiteConfigurationPath($root);
+
+							// If we're including something from site configuraton, look for a corresponding base configuration to include
+							if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
+								$baseConfiguration = str_replace($siteConfigurationPath, $baseConfigurationPath, $ISF_relFilePath);
+								if (@is_dir(PATH_site . $baseConfiguration)) {
+									$staticFilesIncludedFromTemplate[] = $baseConfiguration;
+								}
 							}
 						}
 
