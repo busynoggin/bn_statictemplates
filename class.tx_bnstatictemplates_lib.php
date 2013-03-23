@@ -15,9 +15,12 @@ class tx_bnstatictemplates_lib {
 		if (!is_array($params['items'])) {
 			$params['items'] = array();
 		}
-
 		$baseStaticTemplates = self::getStaticTemplatesInBaseConfigurationPath();
-		$siteStaticTemplates = self::getStaticTemplatesInSiteConfigurationPath($params['row']['pid']);
+		if ($params['row']) {
+			$siteStaticTemplates = self::getStaticTemplatesInSiteConfigurationPath($params['row']['pid']);
+		} else {
+			$siteStaticTEmplates = array();
+		}
 
 		$mergedItems = array();
 		$mergedItems['items'] = array_merge($baseStaticTemplates['items'], $siteStaticTemplates['items']);
