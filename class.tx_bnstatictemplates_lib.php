@@ -100,6 +100,8 @@ class tx_bnstatictemplates_lib {
 		$params = array();
 		$params['items'] = array();
 
+		$name = basename(PATH_site . $relativeConfigurationPath);
+
 		// Default TS
 		$pathToTS = trim($relativeConfigurationPath, '/') . '/Default/Configuration/TypoScript/';
 		if (@is_dir(PATH_site . $pathToTS)) {
@@ -108,7 +110,7 @@ class tx_bnstatictemplates_lib {
 					$configurationName = $configurationKey . ' (Base)';
 					break;
 				case self::PATH_TYPE_SITE:
-					$configurationName = $configurationKey . ' (Site)';
+					$configurationName = $configurationKey . ' (' . $name . ')';
 			}
 
 			$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
