@@ -127,7 +127,7 @@ class tx_bnstatictemplates_lib {
 						$configurationName = $configurationKey . ' (Base)';
 						break;
 					case self::PATH_TYPE_SITE:
-						$configurationName = $configurationKey . ' (Site)';
+						$configurationName = $configurationKey . ' (' . $name . ')';
 				}
 
 				$params['items'][] = array('BN: EXT:' . $configurationName, $pathToTS);
@@ -145,7 +145,7 @@ class tx_bnstatictemplates_lib {
 						$configurationName = $configurationKey . ' (Base)';
 						break;
 					case self::PATH_TYPE_SITE:
-						$configurationName = $configurationKey . ' (Site)';
+						$configurationName = $configurationKey . ' (' . $name . ')';
 				}
 
 				$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
