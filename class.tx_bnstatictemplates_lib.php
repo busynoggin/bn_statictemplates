@@ -86,7 +86,22 @@ class tx_bnstatictemplates_lib {
 	 */
 	protected static function getStaticTemplatesInSiteConfigurationPath($pid) {
 		$relativeConfigurationPath = self::getSiteConfigurationPath($pid);
-		return self::getStaticTemplatesInPath(self::PATH_TYPE_SITE, $relativeConfigurationPath);
+
+		if (strpos($relativeConfigurationPath, ',') !== FALSE) {
+			$staticTemplates = array(
+				'items' => array()
+			);
+			$paths = t3lib_div::trimExplode(',', $relativeConfigurationPath);
+			foreach ($paths as $path) {
+				$staticTemplatesForPath = self::getStaticTemplatesInPath(self::PATH_TYPE_SITE, $path);
+				foreach ($staticTemplatesForPath['items'] as $staticTemplate) {
+					$staticTemplates['items'][] = $staticTemplate;
+				}
+			}
+		} else {
+			$staticTemplates = self::getStaticTemplatesInPath(self::PATH_TYPE_SITE, $relativeConfigurationPath);
+		}
+		return $staticTemplates;
 	}
 
 	/**
