@@ -210,6 +210,12 @@ class tx_bnstatictemplates_lib {
 						if ($root) {
 							$siteConfigurationPath = self::getSiteConfigurationPath($root);
 
+							// If there is more than one path, we'll assume ethat the first one is site.
+							if (strpos($siteConfigurationPath, ',') !== FALSE) {
+								$paths = t3lib_div::trimExplode(',', $relativeConfigurationPath);
+								$siteConfigurationPath = $paths[0];
+							}
+
 							// If we're including something from site configuraton, look for a corresponding base configuration to include
 							if (strstr(rtrim(dirname($ISF_filePath), '/'), rtrim(PATH_site . $siteConfigurationPath, '/')) !== FALSE) {
 								$baseConfiguration = str_replace($siteConfigurationPath, $baseConfigurationPath, $ISF_relFilePath);
