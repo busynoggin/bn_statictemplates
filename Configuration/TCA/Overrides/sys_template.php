@@ -1,11 +1,10 @@
 <?php
-if (!defined('TYPO3_MODE')) {
-	die ('Access denied.');
-}
+defined('TYPO3_MODE') or die();
+
 $tempColumns = array(
 	'tx_bnstatictemplates_path' => array(
 		'exclude' => 0,
-		'label' => 'LLL:EXT:bn_statictemplates/locallang_db.xml:sys_template.tx_bnstatictemplates_path',
+		'label' => 'LLL:EXT:bn_statictemplates/locallang_db.xlf:sys_template.tx_bnstatictemplates_path',
 		'displayCond' => 'FIELD:root:REQ:true',
 		'config' => array(
 			'type'     => 'input',
@@ -29,11 +28,7 @@ $tempColumns = array(
 	),
 );
 
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('sys_template', $tempColumns, 1);
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes('sys_template', 'tx_bnstatictemplates_path;;;;1-1-1', '', 'before:include_static_file');
 
-t3lib_div::loadTCA('sys_template');
-t3lib_extMgm::addTCAcolumns('sys_template',$tempColumns,1);
-t3lib_extMgm::addToAllTCAtypes('sys_template','tx_bnstatictemplates_path;;;;1-1-1', '', 'before:include_static_file');
-require_once(t3lib_extMgm::extPath('bn_statictemplates') . 'class.tx_bnstatictemplates_lib.php');
-$TCA['sys_template']['columns']['include_static_file']['config']['itemsProcFunc'] = 'tx_bnstatictemplates_lib->addStaticTemplates';
-
-?>
+$GLOBALS['TCA']['sys_template']['columns']['include_static_file']['config']['itemsProcFunc'] = \BusyNoggin\BnStatictemplates\StaticTemplateLibrary::class . '->addStaticTemplates';
