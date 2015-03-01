@@ -1,6 +1,8 @@
 <?php
 
-class tx_bnstatictemplates_lib {
+namespace BusyNoggin\BnStaticttemplates;
+
+class StaticTemplateLibrary {
 
 	const PATH_TYPE_BASE = 0;
 	const PATH_TYPE_SITE = 1;
@@ -58,7 +60,7 @@ class tx_bnstatictemplates_lib {
 	 * @return string
 	 */
 	protected static function getSiteConfigurationPath($pageId) {
-		$tmpl = t3lib_div::makeInstance("t3lib_tsparser_ext");
+		$tmpl = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\TypoScript\ExtendedTemplateService::class);
 		$tmpl->tt_track = 0;
 		$tmpl->init();
 
@@ -68,7 +70,7 @@ class tx_bnstatictemplates_lib {
 			return $localTemplateRow['tx_bnstatictemplates_path'];
 		} else {
 			// Gets the rootLine
-			$sys_page = t3lib_div::makeInstance("t3lib_pageSelect");
+			$sys_page = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Frontend\Page\PageRepository::class);
 			$rootLine = $sys_page->getRootLine($pageId);
 			$tmpl->runThroughTemplates($rootLine, $localTemplateRow['uid']);
 
@@ -117,7 +119,7 @@ class tx_bnstatictemplates_lib {
 		}
 
 		// Extension TS
-		$configurations = t3lib_div::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/Extensions/');
+		$configurations = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/Extensions/');
 
 		foreach ((array) $configurations as $configurationKey) {
 			$pathToTS = trim($relativeConfigurationPath, '/') . '/Extensions/' . $configurationKey . '/Configuration/TypoScript/';
@@ -135,7 +137,7 @@ class tx_bnstatictemplates_lib {
 		}
 
 		// addStaticTemplates TS
-		$configurations = t3lib_div::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/StaticTemplates/');
+		$configurations = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs(PATH_site . rtrim($relativeConfigurationPath, '/') . '/StaticTemplates/');
 
 		foreach ((array) $configurations as $configurationKey) {
 			$pathToTS = trim($relativeConfigurationPath, '/') . '/StaticTemplates/' . $configurationKey . '/Configuration/TypoScript/';
@@ -169,7 +171,7 @@ class tx_bnstatictemplates_lib {
 		$row = $params['row'];
 
 		if (trim($row['include_static_file'])) {
-			$include_static_fileArr = t3lib_div::trimExplode(',', $row['include_static_file'], TRUE);
+			$include_static_fileArr = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $row['include_static_file'], TRUE);
 			foreach ((array) $include_static_fileArr as $ISF_filePath) {
 				// Specifically process static templates NOT coming from extensions and have not already been processed
 				if ((substr($ISF_filePath, 0, 4) !== 'EXT:') && !in_array('bnstatictemplate_' . $ISF_filePath, explode(',', $idList))) {
@@ -231,5 +233,3 @@ class tx_bnstatictemplates_lib {
 		return (strstr($path, $siteStaticTSConfigPath) !== FALSE);
 	}
 }
-
-?>
