@@ -1,0 +1,12 @@
+{
+	"name": "busy-noggin/bn-statictemplates",
+	"type": "typo3-cms-extension",
+	"description": "Scans a path (typically in fileadmin) for static templates than can be included.",
+	"homepage": "http://www.busynoggin.com",
+	"license": ["GPL-2.0+"],
+	"keywords": ["TYPO3 CMS"],
+	"support": {
+		"issues": "http://www.busynoggin.com"
+	},
+	"version": "2.0.0"
+}
