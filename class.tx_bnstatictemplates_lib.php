@@ -32,6 +32,16 @@ class tx_bnstatictemplates_lib {
 	}
 
 	/**
+	 * Gets the static template prefix from EXTCONF
+	 *
+	 * @return string
+	 */
+	protected static function getStaticTemplatePrefix() {
+		$extConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['bn_statictemplates']);
+		return ($extConf['staticTemplatePrefix']) ? $extConf['staticTemplatePrefix'] : 'BN';
+	}
+
+	/**
 	 * Gets the base configuration path from EXTCONF
 	 *
 	 * @return string
@@ -101,6 +111,7 @@ class tx_bnstatictemplates_lib {
 		$params['items'] = array();
 
 		$name = basename(PATH_site . $relativeConfigurationPath);
+		$prefix = self::getStaticTemplatePrefix();
 
 		// Default TS
 		$pathToTS = trim($relativeConfigurationPath, '/') . '/Default/Configuration/TypoScript/';
@@ -113,7 +124,7 @@ class tx_bnstatictemplates_lib {
 					$configurationName = $configurationKey . ' (' . $name . ')';
 			}
 
-			$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
+			$params['items'][] = array($prefix . ': ' . $configurationName, $pathToTS);
 		}
 
 		// Extension TS
@@ -130,7 +141,7 @@ class tx_bnstatictemplates_lib {
 						$configurationName = $configurationKey . ' (' . $name . ')';
 				}
 
-				$params['items'][] = array('BN: EXT:' . $configurationName, $pathToTS);
+				$params['items'][] = array($prefix . ': EXT:' . $configurationName, $pathToTS);
 			}
 		}
 
@@ -148,7 +159,7 @@ class tx_bnstatictemplates_lib {
 						$configurationName = $configurationKey . ' (' . $name . ')';
 				}
 
-				$params['items'][] = array('BN: ' . $configurationName, $pathToTS);
+				$params['items'][] = array($prefix . ': ' . $configurationName, $pathToTS);
 			}
 		}
 
