@@ -181,7 +181,7 @@ class StaticTemplateLibrary {
 					if (@is_dir($ISF_filePath)) {
 						// Convert IncludeStaticFile.txt to an array
 						if (@is_file($ISF_filePath . 'IncludeStaticFile.txt')) {
-							$staticFilesIncludedFromTemplate = array_unique(explode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStaticFile.txt')));
+							$staticFilesIncludedFromTemplate = array_unique(explode(',', \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($ISF_filePath . 'IncludeStaticFile.txt')));
 						} else {
 							$staticFilesIncludedFromTemplate = array();
 						}
@@ -207,9 +207,9 @@ class StaticTemplateLibrary {
 						}
 
 						$subrow = array(
-							'constants' => @is_file($ISF_filePath . 'Constants.ts') ? t3lib_div::getUrl($ISF_filePath . 'Constants.ts') : '',
-							'config' => @is_file($ISF_filePath . 'TypoScript.ts') ? t3lib_div::getUrl($ISF_filePath . 'TypoScript.ts') : '',
-							'include_static' => @is_file($ISF_filePath . 'IncludeStatic.txt') ? implode(',', array_unique(t3lib_div::intExplode(',', t3lib_div::getUrl($ISF_filePath . 'IncludeStatic.txt')))) : '',
+							'constants' => @is_file($ISF_filePath . 'Constants.ts') ? \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($ISF_filePath . 'Constants.ts') : '',
+							'config' => @is_file($ISF_filePath . 'TypoScript.ts') ? \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($ISF_filePath . 'TypoScript.ts') : '',
+							'include_static' => @is_file($ISF_filePath . 'IncludeStatic.txt') ? implode(',', array_unique(\TYPO3\CMS\Core\Utility\GeneralUtility::intExplode(',', \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($ISF_filePath . 'IncludeStatic.txt')))) : '',
 							'include_static_file' => implode(',', array_unique($staticFilesIncludedFromTemplate)),
 							'title' => $ISF_relFilePath,
 							'uid' => $ISF_relFilePath
