@@ -1,6 +1,6 @@
 <?php
 
-namespace BusyNoggin\BnStaticttemplates;
+namespace BusyNoggin\BnStatictemplates;
 
 class StaticTemplateLibrary {
 
